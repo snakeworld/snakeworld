@@ -15,10 +15,17 @@ Hi there! Welcome to SnakeWorld !
 
 ```python
 
+from snakeworld.common import Direction
+from snakeworld.client import BaseClient
+
+
 class RandomBot(BaseClient):
     def evaluate(self):
+        # Get a list of available directions
         directions = list(Direction)
+        # Add None in the possible moves, sending None means keeping the current direction
         directions.append(None)
+        # Choose a random direction
         direction = random.choice(directions)
         return direction
 ```
