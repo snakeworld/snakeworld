@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 class BaseClient:
-    def __init__(self, name, server_url='wss://snakeworld-trecouvr.c9.io/'):
+    def __init__(self, name, server_url='ws://52.19.18.173:8080/'):
         self.name = name
         self.server_url = server_url
         self.websocket = None

@@ -41,7 +41,7 @@ bot.run_until_complete()
 ```js
 
 // Connect to the server
-websocket = new WebSocket("wss://snakeworld-trecouvr.c9.io");
+websocket = new WebSocket('ws://52.19.18.173:8080/');
 
 // Send bot name
 websocket.send('{"name": "MyAmazingBotName"}');
