@@ -15,6 +15,8 @@ Hi there! Welcome to SnakeWorld !
 
 ```python
 
+# randombot.py
+
 from snakeworld.common import Direction
 from snakeworld.client import BaseClient
 
@@ -55,3 +57,77 @@ websocket.onmessage = function (event) {
   websocket.send('{"direction": "' + choices[Math.floor(Math.random() * choices.length)] + '"}');
 };
 ```
+
+
+## Protocole
+
+
+### Identification
+
+On his conneciton the client must send an identification message containing his
+name.
+
+```json
+
+{"name": "mybotname"}
+```
+
+
+### Game update
+
+Every 100ms, the game engine do 1 step and send to all clients the new game state
+using the following format:
+
+```json
+{
+    "size": {
+        "width": 200,
+        "height": 100,
+    },
+    "snakes": [
+        {
+            "body": [
+                {"x": 20, "y": 37},
+                ..
+            ],
+            "name": "bot1",
+            "color": "#128020",
+            "direction": "u",
+            "best_length": 27,
+            "length": 17
+        },
+        ..
+    ],
+    "fruits": [
+        {"x": 37, "y":43},
+        ..
+    ],
+    "walls": [
+        {"x": 37, "y":43},
+        ..
+    ],
+    "step": 11367
+}
+```
+
+
+### Action
+
+
+The client can send at any moment an action to the server. The server make a step
+every 100ms, in case the client send more than one action in less than 100ms the
+server will only execute the last one.
+
+
+```json
+
+{"direction": "u"}
+```
+
+The possible actions are:
+
+* "l" for left
+* "r" for right
+* "u" for up
+* "d" for down
+* null to keep the current direction
