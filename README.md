@@ -9,3 +9,16 @@
 
 
 Hi there! Welcome to SnakeWorld !
+
+
+## Implementation example : RandomBot
+
+```python
+
+class RandomBot(BaseClient):
+    def evaluate(self):
+        directions = list(Direction)
+        directions.append(None)
+        direction = random.choice(directions)
+        return direction
+```
