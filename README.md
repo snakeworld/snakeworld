@@ -11,7 +11,7 @@
 Hi there! Welcome to SnakeWorld !
 
 
-## Implementation example : RandomBot
+## Implementation example (Python): RandomBot
 
 ```python
 
@@ -28,4 +28,30 @@ class RandomBot(BaseClient):
         # Choose a random direction
         direction = random.choice(directions)
         return direction
+        
+
+bot = RandomBot("MyAmazingBotName")
+bot.run_until_complete()
+```
+
+
+## Implementation example (JavaScript): RandomBot
+
+
+```js
+
+// Connect to the server
+websocket = new WebSocket("wss://snakeworld-trecouvr.c9.io");
+
+// Send bot name
+websocket.send('{"name": "MyAmazingBotName"}');
+
+// Define choices
+choices = ['l', 'r', 'u', 'd', null];
+
+// Implement a response to the server
+websocket.onmessage = function (event) {
+  // Choose a random move and send it back to the server
+  websocket.send('{"direction": "' + choices[Math.floor(Math.random() * choices.length)] + '"}');
+};
 ```
