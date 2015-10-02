@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+import math
 import time
 import os
 import websockets
@@ -67,7 +68,7 @@ class GameEngine(GameState):
                 if snake.collide(other_snake):
                     if snake is not other_snake:
                         # Other snake killed this snake, he becomes bigger !!
-                        other_snake.inc_length()
+                        other_snake.inc_length(1 + math.floor(0.1*snake.length))
                     snake.reset(self.size)
     
     @asyncio.coroutine
@@ -114,7 +115,7 @@ class GameEngine(GameState):
             else:
                 yield from websocket.send('Error name already in use')
         except Exception as ex:
-            logger.exception("Error")
+            logger.exception("Error with snake %s", snake)
             if snake is not None:
                 self.close_snake(snake)
                 

@@ -13,6 +13,7 @@ class BaseClient:
         self.server_url = server_url
         self.websocket = None
         self.state = None
+        self.mysnake = None
     
     def run_until_complete(self):
         asyncio.get_event_loop().run_until_complete(self.run())
@@ -56,7 +57,7 @@ class BaseClient:
         self.state = GameState.from_dict(data)
         
         if self.name in self.state.snakes:
-            self.mysnake = self.state.snakes[name]
+            self.mysnake = self.state.snakes[self.name]
     
     def evaluate(self):
         """The brain.

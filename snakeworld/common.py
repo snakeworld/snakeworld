@@ -125,8 +125,8 @@ class Snake(GameObject):
         if len(self.body) > self.length:
             self.body.pop()
             
-    def inc_length(self):
-        self.length += 1
+    def inc_length(self, inc=1):
+        self.length += inc
         self.best_length = max(self.length, self.best_length)
     
     def reset(self, map_size):
@@ -151,6 +151,7 @@ class Snake(GameObject):
     def from_dict(cls, data):
         o = cls(None)
         o.body = [Point.from_dict(d) for d in data['body']]
+        o.position = o.body[0]
         o.name = data['name']
         o.color = data['color']
         o.direction = Direction(data['direction'])
@@ -211,9 +212,10 @@ class GameState:
         
     @classmethod
     def from_dict(cls, data):
+        snakes = [Snake.from_dict(d) for d in data['snakes']]
         return cls(
-            size=data['size'],
-            snakes=[Snake.from_dict(d) for d in data['snakes']],
+            size=Size.from_dict(data['size']),
+            snakes=dict((s.name, s) for s in snakes),
             fruits=[Fruit.from_dict(d) for d in data['fruits']],
             walls=[Wall.from_dict(d) for d in data['walls']],
             step=data['step'],
