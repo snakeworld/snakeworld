@@ -33,7 +33,7 @@ class Point:
         
     @classmethod
     def get_random(cls, map_size):
-        return cls(random.randint(1, map_size.width-1), random.randint(1, map_size.height-1))
+        return cls(random.randint(10, map_size.width-10), random.randint(10, map_size.height-10))
         
     def to_dict(self):
         return {'x': self.x, 'y': self.y}
@@ -58,6 +58,9 @@ class Point:
         else:
             raise ValueError("Invalid direction %r" % direction)
             
+    def manathan_distance(self, other):
+        return abs(self.x - other.x) + abs(self.y - other.y)
+        
     def __eq__(self, other):
         return self.x == other.x and self.y == other.y
     
@@ -85,6 +88,9 @@ class GameObject:
         
     def random_move(self, map_size):
         self.position.random_move(map_size)
+        
+    def manathan_distance(self, other):
+        return self.position.manathan_distance(other.position)
     
     def __str__(self):
         return '%s(%s)' % (self.__class__.__name__, self.position)
