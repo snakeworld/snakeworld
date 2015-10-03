@@ -1,4 +1,5 @@
 import asyncio
+import collections
 import json
 import logging
 import math
@@ -17,6 +18,7 @@ class GameEngine(GameState):
         super().__init__(Size(200, 100))
         self.max_fruits = 20
         self.actions = {}
+        self.is_updating = collections.defaultdict(lambda: False)
 
     def run(self):
         start_server = websockets.serve(self.on_client, '0.0.0.0', 8080)
@@ -36,15 +38,23 @@ class GameEngine(GameState):
             while True:
                 start = time.monotonic()
                 self.apply_actions()
+                t_apply_actions = time.monotonic() - start
                 #logger.info("Step %s", self.step)
                 for snake in self.snakes.values():
                     snake.move()
+                t_move = time.monotonic() - start - t_apply_actions
                 self.check_collisions()
-                yield from self.update_clients()
+                t_check_collisions = time.monotonic() - start - t_move
+                self.update_clients(self.step)
+                t_update_clients = time.monotonic() - start - t_check_collisions
+                self.gc_snakes()
+                t_gc_snakes = time.monotonic() - start - t_update_clients
                 self.step += 1
                 ellapsed_time = time.monotonic() - start
                 if ellapsed_time > LOOP_TIME:
                     logger.warning("Ellapsed time for step %s: %.3fs", self.step, ellapsed_time)
+                    logger.warning("t_apply_actions=%.3f, t_move=%.3f, t_check_collisions=%.3f, t_update_clients=%.3f, t_gc_snakes=%.3f" % (
+                        t_apply_actions, t_move, t_check_collisions, t_update_clients, t_gc_snakes))
                 else:
                     yield from asyncio.sleep(LOOP_TIME - ellapsed_time)
         except Exception:
@@ -98,17 +108,30 @@ class GameEngine(GameState):
             else:
                 logger.info('Spawn is too close, reset')
     
-    @asyncio.coroutine
-    def update_clients(self):
+    def update_clients(self, step):
         game_state = self.pack_game_state()
-        to_close = []
         for snake in self.snakes.values():
             if snake.websocket.open:
-                try:
-                    yield from snake.websocket.send(game_state)
-                except IOError as ex:
-                    logger.warning("Error writing to snake %s: %s", snake, ex)
-            else:
+                if self.is_updating[snake.name]:
+                    logger.warning("Snake %s is still updating, skipping frame %s", snake.name, step)
+                else:
+                    asyncio.async(self.update_client(snake, game_state))
+            
+    @asyncio.coroutine
+    def update_client(self, snake, game_state):
+        self.is_updating[snake.name] = True
+        try:
+            if snake.websocket.open:
+                yield from snake.websocket.send(game_state)
+        except Exception as ex:
+            logger.exception("Error during update_client for snake %s: %r", snake.name, ex)
+        finally:
+            self.is_updating[snake.name] = False
+            
+    def gc_snakes(self):
+        to_close = []
+        for snake in self.snakes.values():
+            if not snake.websocket.open:
                 to_close.append(snake)
         for snake in to_close:
             self.close_snake(snake)
