@@ -59,7 +59,9 @@ class GameEngine(GameState):
                     logger.warning("t_apply_actions=%.3f, t_move=%.3f, t_check_collisions=%.3f, t_update_clients=%.3f, t_gc_snakes=%.3f" % (
                         t_apply_actions, t_move, t_check_collisions, t_update_clients, t_gc_snakes))
                 else:
-                    yield from asyncio.sleep(LOOP_TIME - ellapsed_time)
+                    # yield from asyncio.sleep(LOOP_TIME - ellapsed_time)
+                    # for bots, it's better to always give the same time to compute strategy
+                    yield from asyncio.sleep(LOOP_TIME)
                 if self.step % 100 == 0:
                     self.print_stats()
         except Exception:
