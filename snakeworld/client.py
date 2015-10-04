@@ -51,17 +51,29 @@ class BaseClient:
         try:
             data = json.loads(raw_data)
         except:
+            logger.error("Cannot parse %r", raw_data)
+            return
+        if 'error' in data:
+            self.error = data['error']
+            self.state = None
+            logger.warning("Got an error from server: %s", self.error)
             return
         if 'size' not in data:
             print(data)
-        self.state = GameState.from_dict(data)
+        new_state = GameState.from_dict(data)
+        if self.state and new_state.step != self.state.step + 1:
+            logger.warning("Frame skip: prev_step=%s, recv_step=%s", self.state.step, new_state.step)
         
-        if self.name in self.state.snakes:
+        if self.state and self.name in self.state.snakes:
             self.mysnake = self.state.snakes[self.name]
     
     def evaluate(self):
         """The brain.
         
-        Must return a Direction or None
+        Must return a Direction or None.
+        
+        You may access the game state with self.state and the last error with self.error.
+        
+        In case of error self.state will be None.
         """
         raise NotImplementedError()

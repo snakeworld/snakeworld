@@ -157,7 +157,6 @@ class GameEngine(GameState):
                 del self.snakes[snake.name]
                 snake.activate(name)
                 self.snakes[snake.name] = snake
-                yield from websocket.send('Success')
                 while websocket.open:
                     raw_msg = yield from websocket.recv()
                     if raw_msg is None:
