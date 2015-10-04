@@ -35,12 +35,16 @@ class GameEngine(GameState):
             for i in range(self.max_fruits):
                 self.create_fruit()
             logger.info("Ready to loop")
+            start = None
             while True:
+                #if start:
+                #    logger.info("time before last start : %.3fs", time.monotonic() - start)
                 start = time.monotonic()
                 self.apply_actions()
                 t_apply_actions = time.monotonic() - start
                 for snake in self.snakes.values():
-                    snake.move()
+                    if snake.active:
+                        snake.move()
                 t_move = time.monotonic() - start - t_apply_actions
                 self.check_collisions()
                 t_check_collisions = time.monotonic() - start - t_move
@@ -55,7 +59,7 @@ class GameEngine(GameState):
                     logger.warning("t_apply_actions=%.3f, t_move=%.3f, t_check_collisions=%.3f, t_update_clients=%.3f, t_gc_snakes=%.3f" % (
                         t_apply_actions, t_move, t_check_collisions, t_update_clients, t_gc_snakes))
                 else:
-                    yield from asyncio.sleep(LOOP_TIME)
+                    yield from asyncio.sleep(LOOP_TIME - ellapsed_time)
                 if self.step % 100 == 0:
                     self.print_stats()
         except Exception:
@@ -82,6 +86,8 @@ class GameEngine(GameState):
     
     def check_collisions(self):
         for snake in self.snakes.values():
+            if not snake.active:
+                continue
             # Check for collision with fruits
             for fruit in self.fruits:
                 if snake.collide(fruit):
@@ -93,13 +99,16 @@ class GameEngine(GameState):
                     self.reset_snake(snake)
             # Check for collision with other snakes
             for other_snake in self.snakes.values():
-                if snake.collide(other_snake):
+                if other_snake.active and snake.collide(other_snake):
                     if snake is not other_snake:
                         # Other snake killed this snake, he becomes bigger !!
                         other_snake.inc_length(1 + math.floor(0.1*snake.length))
+                        other_snake.killed += 1
                     self.reset_snake(snake)
                     
     def reset_snake(self, snake):
+        snake.died += 1
+        snake.active = False
         for _ in range(20):
             snake.reset(self.size)
             respawn_ok = True
@@ -112,6 +121,7 @@ class GameEngine(GameState):
                 break
             else:
                 logger.info('Spawn is too close, reset')
+        snake.active = True
     
     def update_clients(self, step):
         game_state = self.pack_game_state()

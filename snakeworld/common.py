@@ -84,7 +84,16 @@ class GameObject:
         return cls(Point.from_dict(data))
         
     def collide(self, other):
-        return self.position == other.position
+        if isinstance(other, Snake):
+            other_body = other.body
+            if self is other:
+                other_body = other_body[1:]
+            for p in other_body:
+                if self.position == p:
+                    return True
+            return False
+        else:
+            return self.position == other.position
         
     def random_move(self, map_size):
         self.position.random_move(map_size)
@@ -151,6 +160,8 @@ class Snake(GameObject):
             'direction': self.direction.value,
             'best_length': self.best_length,
             'length': self.length,
+            'died': self.died,
+            'killed': self.killed,
         }
         
     @classmethod
@@ -163,6 +174,8 @@ class Snake(GameObject):
         o.direction = Direction(data['direction'])
         o.best_length = data['best_length']
         o.length = data['length']
+        o.died = data['died']
+        o.killed = data['killed']
         return o
         
     def change_direction(self, direction):
@@ -172,18 +185,6 @@ class Snake(GameObject):
             or (direction == Direction.RIGHT and self.direction == Direction.LEFT):
                 return
         self.direction = direction
-        
-    def collide(self, other):
-        if isinstance(other, Snake):
-            other_body = other.body
-            if self is other:
-                other_body = other_body[1:]
-            for p in other_body:
-                if self.position == p:
-                    return True
-            return False
-        else:
-            return super().collide(other)
 
     def __str__(self):
         return 'Snake(name=%r, direction=%s, position=%s, length=%s, best_length=%s)' % (

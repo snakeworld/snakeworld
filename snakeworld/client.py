@@ -63,7 +63,7 @@ class BaseClient:
         new_state = GameState.from_dict(data)
         if self.state and new_state.step != self.state.step + 1:
             logger.warning("Frame skip: prev_step=%s, recv_step=%s", self.state.step, new_state.step)
-        
+        self.state = new_state
         if self.state and self.name in self.state.snakes:
             self.mysnake = self.state.snakes[self.name]
     
