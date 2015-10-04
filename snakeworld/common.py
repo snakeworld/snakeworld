@@ -1,6 +1,7 @@
 import enum
 import random
 import uuid
+import cgi
 
 
 class Direction(enum.Enum):
@@ -127,7 +128,7 @@ class Snake(GameObject):
         return o
         
     def activate(self, name):
-        self.name = name
+        self.name = cgi.escape(name)[:20]
         self.active = True
         
     def move(self):
