@@ -39,7 +39,6 @@ class GameEngine(GameState):
                 start = time.monotonic()
                 self.apply_actions()
                 t_apply_actions = time.monotonic() - start
-                #logger.info("Step %s", self.step)
                 for snake in self.snakes.values():
                     snake.move()
                 t_move = time.monotonic() - start - t_apply_actions
@@ -56,7 +55,7 @@ class GameEngine(GameState):
                     logger.warning("t_apply_actions=%.3f, t_move=%.3f, t_check_collisions=%.3f, t_update_clients=%.3f, t_gc_snakes=%.3f" % (
                         t_apply_actions, t_move, t_check_collisions, t_update_clients, t_gc_snakes))
                 else:
-                    yield from asyncio.sleep(LOOP_TIME - ellapsed_time)
+                    yield from asyncio.sleep(LOOP_TIME)
         except Exception:
             logger.exception("Error on run")
             
