@@ -169,8 +169,6 @@ class GameEngine(GameState):
                 yield from websocket.send('Error name already in use')
         except Exception as ex:
             logger.exception("Error with snake %s", snake)
-            if snake is not None:
-                self.close_snake(snake)
                 
     @asyncio.coroutine
     def get_snakeinit(self, snake):
@@ -185,11 +183,18 @@ class GameEngine(GameState):
     def close_snake(self, snake):
         name = snake.name
         logger.info('Remove snake %s', name)
-        if snake.name in self.snakes:
-            logger.info("Snake in snakes")
+        if name in self.snakes:
+            logger.info("Remove from snakes")
             del self.snakes[name]
+        if name in self.actions:
+            logger.info("Remove from actions")
+            del self.actions[name]
+        if name in self.is_updating:
+            logger.info("Remove from is_updating")
+            del self.is_updating[name]
         if snake.websocket.open:
-            snake.websocket.close()
+            logger.warning("Websocket was not closed")
+            asyncio.async(snake.websocket.close())
         logger.info('Snake %s has been removed', name)
             
 
