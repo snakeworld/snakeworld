@@ -56,8 +56,14 @@ class GameEngine(GameState):
                         t_apply_actions, t_move, t_check_collisions, t_update_clients, t_gc_snakes))
                 else:
                     yield from asyncio.sleep(LOOP_TIME)
+                if self.step % 100 == 0:
+                    self.print_stats()
         except Exception:
             logger.exception("Error on run")
+            
+    def print_stats(self):
+        print("step=%s, snakes=%s, active_snakes=%s" % (
+            self.step, len(self.snakes), sum(1 for s in self.snakes.values() if s.active)))
             
     def apply_actions(self):
         to_remove = []
