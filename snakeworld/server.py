@@ -29,7 +29,7 @@ class GameEngine(GameState):
     @asyncio.coroutine
     def loop(self):
         logger.info("Engine started")
-        LOOP_TIME = 0.2
+        LOOP_TIME = 0.15
         try:
             logger.info("Create fruits")
             for i in range(self.max_fruits):
