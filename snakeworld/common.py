@@ -127,8 +127,10 @@ class Snake(GameObject):
         o.reset(map_size)
         return o
         
-    def activate(self, name):
+    def activate(self, name, color):
         self.name = cgi.escape(name)[:20]
+        if color:
+            self.color = color
         self.active = True
         
     def move(self):

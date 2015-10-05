@@ -167,7 +167,7 @@ class GameEngine(GameState):
             name = init_data['name']
             if name and name not in self.snakes:
                 del self.snakes[snake.name]
-                snake.activate(name)
+                snake.activate(name, init_data.get('color'))
                 self.snakes[snake.name] = snake
                 while websocket.open:
                     raw_msg = yield from websocket.recv()
