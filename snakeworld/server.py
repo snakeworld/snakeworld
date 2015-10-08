@@ -1,5 +1,6 @@
 import asyncio
 import collections
+import csv
 import json
 import logging
 import math
@@ -14,11 +15,40 @@ logger = logging.getLogger(__name__)
 
 
 class GameEngine(GameState):
+
+    BACKUP_FILEPATH = './save.txt'
+
     def __init__(self):
         super().__init__(Size(200, 100))
         self.max_fruits = 20
         self.actions = {}
         self.is_updating = collections.defaultdict(lambda: False)
+        self.scores = {}
+
+    def load(self):
+        self.scores.clear()
+        if os.path.exists(self.BACKUP_FILEPATH):
+            with open(self.BACKUP_FILEPATH) as f:
+                reader = csv.reader(f)
+                for name, score in reader:
+                    self.scores[name] = int(score)
+        logger.info('Loaded scores: %r', self.scores)
+
+    def save(self):
+        logger.info('Saving state...')
+        try:
+            for snake in self.snakes.values():
+                if snake.best_length > 6:
+                    self.scores[snake.name] = snake.best_length
+            if self.scores:
+                tmp_filepath = self.BACKUP_FILEPATH + '.tmp'
+                with open(tmp_filepath, 'w') as f:
+                    writer = csv.writer(f)
+                    for name, score in self.scores.items():
+                        writer.writerow((name, score))
+                os.rename(tmp_filepath, self.BACKUP_FILEPATH)
+        except Exception:
+            logger.exception('Error saving state')
 
     def run(self):
         start_server = websockets.serve(self.on_client, '0.0.0.0', 8080)
@@ -64,6 +94,7 @@ class GameEngine(GameState):
                     yield from asyncio.sleep(LOOP_TIME)
                 if self.step % 100 == 0:
                     self.print_stats()
+                    self.save()
         except Exception:
             logger.exception("Error on run")
             
@@ -171,6 +202,9 @@ class GameEngine(GameState):
             if name and name not in self.snakes:
                 del self.snakes[snake.name]
                 snake.activate(name, init_data.get('color'))
+                # Restore previous data
+                if name in self.scores:
+                    snake.best_length = self.scores[name]
                 self.snakes[snake.name] = snake
                 while websocket.open:
                     raw_msg = yield from websocket.recv()
@@ -223,4 +257,10 @@ if __name__ == '__main__':
     logger.setLevel('INFO')
     
     engine = GameEngine()
-    engine.run()
+    engine.load()
+    try:
+        engine.run()
+    except KeyboardInterrupt:
+        logger.info('Saving state, hit ctrl-C again to hard stop')
+        engine.save()
+        asyncio.get_event_loop().close()
