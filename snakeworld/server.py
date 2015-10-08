@@ -87,6 +87,7 @@ class GameEngine(GameState):
         self.fruits.append(fruit)
     
     def check_collisions(self):
+        to_reset = []
         for snake in self.snakes.values():
             if not snake.active:
                 continue
@@ -98,7 +99,7 @@ class GameEngine(GameState):
             # Check for collision with map borders
             if not ((0 <= snake.position.x < self.size.width) \
                 and (0 <= snake.position.y < self.size.height)):
-                    self.reset_snake(snake)
+                    to_reset.append(snake)
             # Check for collision with other snakes
             for other_snake in self.snakes.values():
                 if other_snake.active and snake.collide(other_snake):
@@ -106,7 +107,9 @@ class GameEngine(GameState):
                         # Other snake killed this snake, he becomes bigger !!
                         other_snake.inc_length(1 + math.floor(0.1*snake.length))
                         other_snake.killed += 1
-                    self.reset_snake(snake)
+                    to_reset.append(snake)
+        for snake in to_reset:
+            self.reset_snake(snake)
                     
     def reset_snake(self, snake):
         snake.died += 1
