@@ -43,7 +43,7 @@ bot.run_until_complete()
 ```js
 
 // Connect to the server
-websocket = new WebSocket('ws://52.19.18.173:8080/');
+websocket = new WebSocket('ws://5.39.83.97:8080/');
 
 // Send bot name
 websocket.send('{"name": "MyAmazingBotName"}');

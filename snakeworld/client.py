@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 class BaseClient:
-    def __init__(self, name, server_url='ws://52.19.18.173:8080/'):
+    def __init__(self, name, server_url='ws://5.39.83.97:8080/'):
         self.name = name
         self.server_url = server_url
         self.websocket = None
@@ -36,6 +36,7 @@ class BaseClient:
             else:
                 direction = self.evaluate()
             if direction is not None:
+                print(direction)
                 yield from self.websocket.send(json.dumps({'direction': direction.value}))
 
     @asyncio.coroutine
@@ -66,7 +67,11 @@ class BaseClient:
         self.state = new_state
         if self.state and self.name in self.state.snakes:
             self.mysnake = self.state.snakes[self.name]
-    
+
+    @asyncio.coroutine
+    def close(self):
+        yield from self.websocket.close()
+
     def evaluate(self):
         """The brain.
         
