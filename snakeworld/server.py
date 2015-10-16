@@ -9,6 +9,7 @@ import os
 import websockets
 
 from .common import *
+from .utils import json_dumps
 
 
 logger = logging.getLogger(__name__)
@@ -188,7 +189,7 @@ class GameEngine(GameState):
             self.close_snake(snake)
     
     def pack_game_state(self):
-        return json.dumps(self.to_dict())
+        return json_dumps(self.to_dict())
     
     @asyncio.coroutine
     def on_client(self, websocket, path):
@@ -217,7 +218,7 @@ class GameEngine(GameState):
                             direction = Direction(msg['direction'])
                             self.actions[snake.name] = direction
                     except Exception as ex:
-                        yield from websocket.send(json.dumps({'error': str(ex)}))
+                        yield from websocket.send(json_dumps({'error': str(ex)}))
                 print('Client closed')
             else:
                 yield from websocket.send('Error name already in use')
