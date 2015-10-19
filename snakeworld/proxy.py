@@ -71,7 +71,7 @@ class ReadOnlyProxy:
         logger.info('Connecting to webserver...')
         self.websocket = yield from websockets.connect(self.server_url)
         logger.info('Listening connections...')
-        yield from websockets.serve(self.on_client, '0.0.0.0', 8080)
+        yield from websockets.serve(self.on_client, '0.0.0.0', 8081)
         yield from self.loop()
         logger.info('Proxy stop')
 
@@ -133,6 +133,8 @@ class ReadOnlyProxy:
 
 
 if __name__ == '__main__':
+    import sys
+
     logger.addHandler(logging.StreamHandler())
     logger.setLevel('INFO')
 
@@ -147,8 +149,12 @@ if __name__ == '__main__':
         print('json (compressed): %.3f ko' % (len(js2) / 1000))
         print('msgpack (compressed): %.3f ko' % (len(m2) / 1000))
 
-    url = 'ws://localhost:8080/'
-    url = 'ws://5.39.83.97:8080/'
     compressor = GameStateCompressor()
-    proxy = ReadOnlyProxy(server_url=url, compressor=compressor, pack=ReadOnlyProxy.PACK_MSGPACK)
+    kwargs = {
+        'compressor': compressor,
+        'pack': ReadOnlyProxy.PACK_MSGPACK,
+    }
+    if len(sys.argv) > 1:
+        kwargs['server_url'] = sys.argv[1]
+    proxy = ReadOnlyProxy(**kwargs)
     proxy.run_until_complete()
