@@ -44,8 +44,8 @@ class Point:
         return cls(data['x'], data['y'])
         
     def random_move(self, map_size):
-        self.x = random.randint(1, map_size.width-1)
-        self.y = random.randint(1, map_size.height-1)
+        self.x = random.randint(1, map_size.width-2)
+        self.y = random.randint(1, map_size.height-2)
         
     def get_neighbour(self, direction):
         if direction == Direction.LEFT:
