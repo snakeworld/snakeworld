@@ -68,7 +68,7 @@ class ReadOnlyProxy:
 
     @asyncio.coroutine
     def run(self):
-        logger.info('Connecting to webserver...')
+        logger.info('Connecting to webserver %s...', self.server_url)
         self.websocket = yield from websockets.connect(self.server_url)
         logger.info('Listening connections...')
         yield from websockets.serve(self.on_client, '0.0.0.0', 8081)
